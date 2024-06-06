@@ -64,7 +64,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "1":
 			room.AddToRoom(senderId, conn)
-			clientIdString, err := room.FlattenArray()
+			clientIdString := room.FlattenArray()
 			if err != nil {
 				fmt.Println("error making string array of client ids")
 			}
@@ -91,7 +91,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			room.ClearClientArray()
 
 		case "5":
-			msg, err := room.FlattenArray()
+			msg := room.FlattenArray()
 			if err != nil {
 				fmt.Println(err)
 				continue

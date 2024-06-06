@@ -60,7 +60,7 @@ func (r *Room) Negotiate(senderId string, receiverId string, data string) error 
 	return nil
 }
 
-func (r *Room) FlattenArray() (string, error) {
+func (r *Room) FlattenArray() string {
 	var strArr []string
 
 	for i := range r.Clients {
@@ -69,5 +69,5 @@ func (r *Room) FlattenArray() (string, error) {
 	}
 	flattenedStr := strings.Join(strArr, "&")
 	fmt.Println("clients in room: ", flattenedStr)
-	return flattenedStr, nil
+	return flattenedStr
 }
