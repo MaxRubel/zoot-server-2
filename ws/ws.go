@@ -15,8 +15,6 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var room models.Room
-
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -45,10 +43,14 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		tp := split[0]
-		senderId := split[1]
-		recepientId := split[2]
-		data := split[3]
-		// utils.PrintIncomingWs(tp, senderId, recepientId)
+		roomId := split[1]
+		senderId := split[2]
+		recepientId := split[3]
+		data := split[4]
+		room, _ := models.AllRooms.FindRoom(roomId)
+
+		// utils.PrintIncomingWs(tp, roomId, senderId, recepientId)
+
 		switch tp {
 
 		case "0":
@@ -61,7 +63,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			conn.WriteMessage(1, []byte("4&"+clientIdString))
 
 		case "2":
-			err := room.Negotiate(senderId, recepientId, data)
+			err := room.Negotiate(senderId, roomId, recepientId, data)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -69,11 +71,20 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "3":
 			fmt.Println("leaving room")
-			err = room.RemoveFromRoom(senderId)
+			clientsLeft, err := room.RemoveClient(senderId)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
+			if clientsLeft == 0 {
+				fmt.Println("room is empty, deleting")
+				room, err := models.AllRooms.FindRoom(roomId)
+				if err != nil {
+					fmt.Println(err)
+				}
+				room.Delete()
+			}
+
 			conn.Close()
 			return
 
@@ -82,7 +93,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "5":
 			msg := room.FlattenArray()
-			fmt.Println("client return: ", msg)
 			room.BroadcastMessage("0" + msg)
 		}
 	}

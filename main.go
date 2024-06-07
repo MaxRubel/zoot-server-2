@@ -9,15 +9,14 @@ import (
 )
 
 func main() {
-    r := routes.Router()
+	r := routes.Router()
 
-    // Enable CORS
-    corsHandler := handlers.CORS(
-        handlers.AllowedOrigins([]string{"*"}),
-        handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
-        handlers.AllowedHeaders([]string{"Content-Type"}),
-    )(r)
-	
+	corsHandler := handlers.CORS(
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+		handlers.AllowedHeaders([]string{"Content-Type"}),
+	)(r)
+
 	fmt.Println("Server is running on http://localhost:8080")
 	err := http.ListenAndServe(":8080", corsHandler)
 	if err != nil {
