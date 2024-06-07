@@ -10,9 +10,9 @@ import (
 )
 
 type Room struct {
-	Id string `json:"id"`
-	Name string `json:"name"`
-	Clients    []Client `json:"clients"`
+	Id      string   `json:"id"`
+	Name    string   `json:"name"`
+	Clients []Client `json:"clients"`
 }
 
 func (r *Room) AddToRoom(id string, conn *websocket.Conn) error {
@@ -30,17 +30,17 @@ func (r *Room) AddToRoom(id string, conn *websocket.Conn) error {
 	return nil
 }
 
-func (r *Room) RemoveFromRoom(id string) error {
+func (r *Room) RemoveClient(id string) (int, error) {
 	for i := range r.Clients {
 		if r.Clients[i].Id == id {
 			fmt.Println("removing client from room ")
 			r.Clients = append(r.Clients[:i], r.Clients[i+1:]...)
-			return nil
+			return len(r.Clients), nil
 		}
-		message := "5&"+id+"&&"
+		message := "5&" + id + "&&"
 		r.BroadcastMessage(message)
 	}
-	return fmt.Errorf("client with ID %s not found in the room", id)
+	return 0, fmt.Errorf("client with ID %s not found in the room", id)
 }
 
 func (r *Room) BroadcastMessage(msg string) {
@@ -55,10 +55,19 @@ func (r *Room) ClearClientArray() {
 	fmt.Println("cleared client array", newArray)
 }
 
-func (r *Room) Negotiate(senderId string, receiverId string, data string) error {
+func (r *Room) Negotiate(senderId string, roomID, receiverId string, data string) error {
 	fmt.Println("negotiating...")
-	r.BroadcastMessage("3" + "&" + senderId + "&" + receiverId + "&" + data)
+	r.BroadcastMessage("3" + "&" + roomID + "&" + senderId + "&" + receiverId + "&" + data)
 	return nil
+}
+
+func (r *Room) Delete() {
+	for i := range AllRooms {
+		if AllRooms[i].Id == r.Id {
+			AllRooms = append(AllRooms[:i], AllRooms[i+1:]...)
+			return
+		}
+	}
 }
 
 func (r *Room) FlattenArray() string {
@@ -73,6 +82,6 @@ func (r *Room) FlattenArray() string {
 	return flattenedStr
 }
 
-func (r *Room) AddRoomId(){
+func (r *Room) AddRoomId() {
 	r.Id = uuid.New().String()
 }

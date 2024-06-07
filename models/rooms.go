@@ -1,19 +1,20 @@
 package models
 
+import "errors"
+
 type Rooms []Room
+
 var AllRooms Rooms
 
-func (r *Rooms)AddRoom(room Room){
+func (r *Rooms) AddRoom(room Room) {
 	*r = append(*r, room)
 }
 
-func (r *Rooms) DeleteRoomByID(roomID string) {
-    for i, room := range *r {
-        if room.Id == roomID {
-            *r = append((*r)[:i], (*r)[i+1:]...)
-            return
-        }
-    }
+func (r *Rooms) FindRoom(id string) (*Room, error) {
+	for i := range *r {
+		if (*r)[i].Id == id {
+			return &(*r)[i], nil
+		}
+	}
+	return nil, errors.New("error-no room found")
 }
-
-
