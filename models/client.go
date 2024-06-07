@@ -3,6 +3,6 @@ package models
 import "github.com/gorilla/websocket"
 
 type Client struct {
-	Id string
+	Id string `json:"id"`
 	Ws *websocket.Conn
 }

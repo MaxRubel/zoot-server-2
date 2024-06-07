@@ -9,12 +9,6 @@ import (
 	"wuddup.com/models"
 )
 
-func writeCORS(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
-}
-
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -24,7 +18,6 @@ var upgrader = websocket.Upgrader{
 var room models.Room
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
-	writeCORS(w)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return
@@ -65,9 +58,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "1":
 			room.AddToRoom(senderId, conn)
 			clientIdString := room.FlattenArray()
-			if err != nil {
-				fmt.Println("error making string array of client ids")
-			}
 			conn.WriteMessage(1, []byte("4&"+clientIdString))
 
 		case "2":
@@ -92,10 +82,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "5":
 			msg := room.FlattenArray()
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
 			fmt.Println("client return: ", msg)
 			room.BroadcastMessage("0" + msg)
 		}

@@ -5,18 +5,17 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 type Room struct {
-	Clients    []Client
-	HostJoined bool
+	Id string `json:"id"`
+	Name string `json:"name"`
+	Clients    []Client `json:"clients"`
 }
 
 func (r *Room) AddToRoom(id string, conn *websocket.Conn) error {
-	if len(r.Clients) == 0 {
-		r.HostJoined = true
-	}
 	for i := range r.Clients {
 		if r.Clients[i].Id == id {
 			return errors.New("client already in room")
@@ -27,7 +26,6 @@ func (r *Room) AddToRoom(id string, conn *websocket.Conn) error {
 		Ws: conn,
 	})
 	fmt.Println("client added to room")
-	fmt.Println("host has joined:", r.HostJoined)
 	fmt.Println("clients in room: ", r.Clients)
 	return nil
 }
@@ -35,9 +33,12 @@ func (r *Room) AddToRoom(id string, conn *websocket.Conn) error {
 func (r *Room) RemoveFromRoom(id string) error {
 	for i := range r.Clients {
 		if r.Clients[i].Id == id {
+			fmt.Println("removing client from room ")
 			r.Clients = append(r.Clients[:i], r.Clients[i+1:]...)
 			return nil
 		}
+		message := "5&"+id+"&&"
+		r.BroadcastMessage(message)
 	}
 	return fmt.Errorf("client with ID %s not found in the room", id)
 }
@@ -70,4 +71,8 @@ func (r *Room) FlattenArray() string {
 	flattenedStr := strings.Join(strArr, "&")
 	fmt.Println("clients in room: ", flattenedStr)
 	return flattenedStr
+}
+
+func (r *Room) AddRoomId(){
+	r.Id = uuid.New().String()
 }
