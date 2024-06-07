@@ -4,13 +4,22 @@ import (
 	"fmt"
 	"net/http"
 
-	"wuddup.com/ws"
+	"github.com/gorilla/handlers"
+	"wuddup.com/routes"
 )
 
 func main() {
-	http.HandleFunc("/ws", ws.WsHandler)
+    r := routes.Router()
+
+    // Enable CORS
+    corsHandler := handlers.CORS(
+        handlers.AllowedOrigins([]string{"*"}),
+        handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+        handlers.AllowedHeaders([]string{"Content-Type"}),
+    )(r)
+	
 	fmt.Println("Server is running on http://localhost:8080")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", corsHandler)
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 	}
