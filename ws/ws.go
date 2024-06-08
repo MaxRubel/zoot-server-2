@@ -15,6 +15,8 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+var WaitingRoom models.Room
+
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -26,16 +28,14 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	//-----LISTENER-----//
 	for {
 		_, msg, err := conn.ReadMessage()
-		if websocket.IsCloseError(err, websocket.CloseGoingAway) {
-			fmt.Println("Closing WebSocket connection")
-			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				fmt.Println("Error writing close message:", err)
+		if err != nil {
+			conn.Close()
+			if websocket.IsCloseError(err, websocket.CloseGoingAway) {
+				fmt.Println("Client closed WebSocket connection and you did not catch it")
+			} else {
+				fmt.Println("Client must have crashed :(")
 			}
 			return
-		}
-		if err != nil {
-			continue
 		}
 
 		split := strings.Split(string(msg), "&")
@@ -48,9 +48,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		senderId := split[2]
 		recepientId := split[3]
 		data := split[4]
+
 		room, _ := models.AllRooms.FindRoom(roomId)
 
-		// for debugging: display the incoming data:
+		// debugging: display the incoming data:
 		// utils.PrintIncomingWs(msgType, roomId, senderId, recepientId)
 
 		//------FUNCTIONS------//
@@ -59,7 +60,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "0":
 			fmt.Println("Received test message")
 			room.BroadcastMessage("0Server received your message!")
-
 		case "1":
 			err := room.AddClient(senderId, conn)
 			if err != nil {
@@ -67,21 +67,25 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			conn.WriteMessage(1, []byte("4&"+room.GetAllIds()))
-
+			WaitingRoom.BroadcastRoomsUpdate()
 		case "2":
 			room.Negotiate(senderId, recepientId, data)
-
 		case "3":
 			fmt.Println("leaving room")
 			room.RemoveClient(senderId)
 			conn.Close()
+			WaitingRoom.BroadcastRoomsUpdate()
 			return
-
 		case "4":
 			room.ClearClientArray()
-
 		case "5":
 			room.BroadcastMessage("0" + room.GetAllIds())
+		case "6":
+			WaitingRoom.AddClient(senderId, conn)
+			conn.WriteMessage(1, []byte("7&"+string(models.AllRoomsJSON())))
+		case "7":
+			conn.Close()
+			WaitingRoom.RemoveClient(senderId)
 		}
 	}
 }
