@@ -10,7 +10,7 @@ import (
 
 func GetAllRooms(w http.ResponseWriter, r *http.Request) {
 	roomsJson, err := json.Marshal(models.AllRooms)
-	fmt.Println(models.AllRooms)
+	fmt.Println("serving number of rooma: ", len(models.AllRooms))
 	if err != nil {
 		fmt.Println("Error Marshalling JSON")
 		return
@@ -27,13 +27,8 @@ func CreateNewRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newRoom.AddRoomId()
-
-	var clients []models.Client
-	newRoom.Clients = clients
-
-	models.AllRooms = append(models.AllRooms, newRoom)
+	id := newRoom.Create()
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(newRoom.Id))
+	w.Write([]byte(id))
 }

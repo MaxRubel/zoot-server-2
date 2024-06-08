@@ -15,10 +15,20 @@ type Room struct {
 	Clients []Client `json:"clients"`
 }
 
-func (r *Room) AddToRoom(id string, conn *websocket.Conn) error {
+func (r *Room) Create() string {
+	r.Clients = []Client{}
+	r.AddRoomId()
+	AllRooms = append(AllRooms, *r)
+	return r.Id
+}
+
+func (r *Room) AddClient(id string, conn *websocket.Conn) error {
+	if r == nil {
+		return errors.New("error this room does not exist")
+	}
 	for i := range r.Clients {
 		if r.Clients[i].Id == id {
-			return errors.New("client already in room")
+			return errors.New("error: client already in room")
 		}
 	}
 	r.Clients = append(r.Clients, Client{
@@ -26,21 +36,24 @@ func (r *Room) AddToRoom(id string, conn *websocket.Conn) error {
 		Ws: conn,
 	})
 	fmt.Println("client added to room")
-	fmt.Println("clients in room: ", r.Clients)
+	fmt.Println("number of clients in room: ", len(r.Clients))
 	return nil
 }
 
-func (r *Room) RemoveClient(id string) (int, error) {
+func (r *Room) RemoveClient(id string) {
 	for i := range r.Clients {
 		if r.Clients[i].Id == id {
-			fmt.Println("removing client from room ")
 			r.Clients = append(r.Clients[:i], r.Clients[i+1:]...)
-			return len(r.Clients), nil
+			fmt.Println("removed client from room.  ", len(r.Clients), "  left in room")
+			break
 		}
-		message := "5&" + id + "&&"
-		r.BroadcastMessage(message)
 	}
-	return 0, fmt.Errorf("client with ID %s not found in the room", id)
+	message := "5&" + id + "&&"
+	r.BroadcastMessage(message)
+	if len(r.Clients) == 0 {
+		fmt.Println("room is empty, deleting")
+		r.Delete()
+	}
 }
 
 func (r *Room) BroadcastMessage(msg string) {
@@ -55,10 +68,9 @@ func (r *Room) ClearClientArray() {
 	fmt.Println("cleared client array", newArray)
 }
 
-func (r *Room) Negotiate(senderId string, roomID, receiverId string, data string) error {
+func (r *Room) Negotiate(senderId string, receiverId string, data string) {
 	fmt.Println("negotiating...")
-	r.BroadcastMessage("3" + "&" + roomID + "&" + senderId + "&" + receiverId + "&" + data)
-	return nil
+	r.BroadcastMessage("3" + "&" + r.Id + "&" + senderId + "&" + receiverId + "&" + data)
 }
 
 func (r *Room) Delete() {
@@ -70,15 +82,13 @@ func (r *Room) Delete() {
 	}
 }
 
-func (r *Room) FlattenArray() string {
+func (r *Room) GetAllIds() string {
 	var strArr []string
 
 	for i := range r.Clients {
-		fmt.Println("client id:", r.Clients[i].Id)
 		strArr = append(strArr, r.Clients[i].Id)
 	}
 	flattenedStr := strings.Join(strArr, "&")
-	fmt.Println("clients in room: ", flattenedStr)
 	return flattenedStr
 }
 
