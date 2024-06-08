@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -20,10 +21,12 @@ func (r *Room) Create() string {
 	r.AddRoomId()
 	AllRooms = append(AllRooms, *r)
 	return r.Id
+
 }
 
 func (r *Room) AddClient(id string, conn *websocket.Conn) error {
 	if r == nil {
+		conn.WriteMessage(1, []byte("6&&&"))
 		return errors.New("error this room does not exist")
 	}
 	for i := range r.Clients {
@@ -94,4 +97,22 @@ func (r *Room) GetAllIds() string {
 
 func (r *Room) AddRoomId() {
 	r.Id = uuid.New().String()
+}
+
+func (r *Room)BroadcastRoomsUpdate(){
+	fmt.Println("updating waiting room")
+	msg := AllRoomsJSON()
+	for i := range r.Clients{
+			r.Clients[i].Ws.WriteMessage(1, []byte("7&"+ string(msg)))
+	}
+}
+
+func AllRoomsJSON() []byte{
+	roomsJson, err := json.Marshal(AllRooms)
+	fmt.Println("serving number of rooms: ", len(AllRooms))
+	if err != nil {
+		fmt.Println("Error Marshalling JSON")
+		return nil
+	}
+	return roomsJson
 }

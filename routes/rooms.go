@@ -6,11 +6,12 @@ import (
 	"net/http"
 
 	"wuddup.com/models"
+	"wuddup.com/ws"
 )
 
 func GetAllRooms(w http.ResponseWriter, r *http.Request) {
 	roomsJson, err := json.Marshal(models.AllRooms)
-	fmt.Println("serving number of rooma: ", len(models.AllRooms))
+	fmt.Println("serving number of rooms: ", len(models.AllRooms))
 	if err != nil {
 		fmt.Println("Error Marshalling JSON")
 		return
@@ -31,4 +32,5 @@ func CreateNewRoom(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(id))
+	ws.WaitingRoom.BroadcastRoomsUpdate()
 }

@@ -1,14 +1,12 @@
 package models
 
-import "errors"
+import (
+	"errors"
+)
 
 type Rooms []Room
 
 var AllRooms Rooms
-
-func (r *Rooms) AddRoom(room Room) {
-	*r = append(*r, room)
-}
 
 func (r *Rooms) FindRoom(id string) (*Room, error) {
 	for i := range *r {
@@ -18,3 +16,4 @@ func (r *Rooms) FindRoom(id string) (*Room, error) {
 	}
 	return nil, errors.New("error-no room found")
 }
+
