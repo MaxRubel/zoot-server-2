@@ -3,3 +3,5 @@ app.yaml
 .gcloudignore
 dockerfile
 .gitignore
+Deploy_Instructions.md
+deploy.sh
