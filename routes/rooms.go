@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"wuddup.com/models"
-	"wuddup.com/ws"
+	"github.com/MaxRubel/zoot-server-2/models"
+	"github.com/MaxRubel/zoot-server-2/utils"
+	"github.com/MaxRubel/zoot-server-2/ws"
 )
 
 func GetAllRooms(w http.ResponseWriter, r *http.Request) {
 	roomsJson, err := json.Marshal(models.AllRooms)
-	fmt.Println("serving number of rooms: ", len(models.AllRooms))
+	// fmt.Println("serving number of rooms: ", len(models.AllRooms))
 	if err != nil {
 		fmt.Println("Error Marshalling JSON")
 		return
@@ -22,13 +23,18 @@ func GetAllRooms(w http.ResponseWriter, r *http.Request) {
 
 func CreateNewRoom(w http.ResponseWriter, r *http.Request) {
 	var newRoom models.Room
+	id := utils.CreateId()
+
+	newRoom.Clients = make(map[string]models.Client)
+	newRoom.Id = id
+
 	err := json.NewDecoder(r.Body).Decode(&newRoom)
 	if err != nil {
 		fmt.Println("error decoding JSON from request body")
 		return
 	}
 
-	id := newRoom.Create()
+	models.AllRooms[id] = newRoom
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(id))
