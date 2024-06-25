@@ -1,1 +1,5 @@
 db.sqlite3
+app.yaml
+.gcloudignore
+dockerfile
+.gitignore

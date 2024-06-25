@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+
 	r := routes.Router()
 
 	corsHandler := handlers.CORS(

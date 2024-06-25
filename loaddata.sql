@@ -5,4 +5,4 @@
 --     count INTEGER
 -- );
 
-INSERT INTO ws_count (count) VALUES (0)
+INSERT INTO ws_count (count) VALUES (0);
