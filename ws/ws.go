@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/MaxRubel/zoot-server-2/db"
+	"github.com/MaxRubel/zoot-server-2/models"
 	"github.com/gorilla/websocket"
-	"wuddup.com/models"
 )
 
 var upgrader = websocket.Upgrader{
@@ -16,6 +17,10 @@ var upgrader = websocket.Upgrader{
 }
 
 var WaitingRoom models.Room
+
+func init() {
+	WaitingRoom.Clients = make(map[string]models.Client)
+}
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -29,11 +34,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
+			fmt.Println("error - removing user before remove function can run")
 			conn.Close()
 			if websocket.IsCloseError(err, websocket.CloseGoingAway) {
-				fmt.Println("Client closed WebSocket connection and you did not catch it")
-			} else {
-				fmt.Println("Client must have crashed :(")
+				fmt.Println("Client closed WebSocket connection and I did not catch it")
 			}
 			return
 		}
@@ -50,7 +54,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		data := split[4]
 
 		room, _ := models.AllRooms.FindRoom(roomId)
-
+		db.IncrementWsCount()
 		// debugging: display the incoming data:
 		// utils.PrintIncomingWs(msgType, roomId, senderId, recepientId)
 
@@ -71,7 +75,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "2":
 			room.Negotiate(senderId, recepientId, data)
 		case "3":
-			fmt.Println("leaving room")
+			fmt.Println("leaving room", room.Id)
 			room.RemoveClient(senderId)
 			conn.Close()
 			WaitingRoom.BroadcastRoomsUpdate()
@@ -83,6 +87,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "6":
 			WaitingRoom.AddClient(senderId, conn)
 			conn.WriteMessage(1, []byte("7&"+string(models.AllRoomsJSON())))
+			db.IncrementWsCount()
 		case "7":
 			conn.Close()
 			WaitingRoom.RemoveClient(senderId)

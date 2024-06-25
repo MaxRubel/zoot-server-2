@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/MaxRubel/zoot-server-2/routes"
 	"github.com/gorilla/handlers"
-	"wuddup.com/routes"
 )
 
 func main() {
+
 	r := routes.Router()
 
 	corsHandler := handlers.CORS(

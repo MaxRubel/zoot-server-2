@@ -1,8 +1,8 @@
 package routes
 
 import (
+	"github.com/MaxRubel/zoot-server-2/ws"
 	"github.com/gorilla/mux"
-	"wuddup.com/ws"
 )
 
 func Router() *mux.Router {
