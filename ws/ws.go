@@ -7,7 +7,6 @@ import (
 
 	"github.com/MaxRubel/zoot-server-2/db"
 	"github.com/MaxRubel/zoot-server-2/models"
-	"github.com/MaxRubel/zoot-server-2/utils"
 	"github.com/gorilla/websocket"
 )
 
@@ -24,7 +23,6 @@ func init() {
 }
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("setting up websocket")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("error creating ws connection")
@@ -36,10 +34,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println("removing user before remove function can run")
+			fmt.Println("error - removing user before remove function can run")
 			conn.Close()
 			if websocket.IsCloseError(err, websocket.CloseGoingAway) {
-				fmt.Println("Client closed WebSocket connection and you did not catch it")
+				fmt.Println("Client closed WebSocket connection and I did not catch it")
 			}
 			return
 		}
@@ -58,7 +56,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		room, _ := models.AllRooms.FindRoom(roomId)
 		db.IncrementWsCount()
 		// debugging: display the incoming data:
-		utils.PrintIncomingWs(msgType, roomId, senderId, recepientId)
+		// utils.PrintIncomingWs(msgType, roomId, senderId, recepientId)
 
 		//------FUNCTIONS------//
 		switch msgType {
@@ -77,15 +75,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "2":
 			room.Negotiate(senderId, recepientId, data)
 		case "3":
-			fmt.Println("Received leave room message")
-			if conn.WriteMessage(websocket.TextMessage, []byte("Leaving room")) != nil {
-				fmt.Println("Connection already closed")
-			} else {
-				fmt.Println("leaving room", room.Id)
-				room.RemoveClient(senderId)
-				conn.Close()
-				WaitingRoom.BroadcastRoomsUpdate()
-			}
+			fmt.Println("leaving room", room.Id)
+			room.RemoveClient(senderId)
+			conn.Close()
+			WaitingRoom.BroadcastRoomsUpdate()
 			return
 		case "4":
 			room.ClearClientArray()

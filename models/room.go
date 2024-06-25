@@ -39,7 +39,7 @@ func (r *Room) RemoveClient(id string) {
 	message := "5&" + id + "&&"
 	r.BroadcastMessage(message)
 	if len(r.Clients) == 0 {
-		fmt.Println("room is empty, deleting")
+		// fmt.Println("room is empty, deleting")
 		r.Delete()
 	}
 }
