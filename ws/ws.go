@@ -34,7 +34,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println("error - removing user before remove function can run")
 			conn.Close()
 			if websocket.IsCloseError(err, websocket.CloseGoingAway) {
 				fmt.Println("Client closed WebSocket connection and I did not catch it")
@@ -55,21 +54,17 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 		room, _ := models.AllRooms.FindRoom(roomId)
 		db.IncrementWsCount()
-		// debugging: display the incoming data:
+
+		// debugging: log the incoming data:
 		// utils.PrintIncomingWs(msgType, roomId, senderId, recepientId)
 
 		//------FUNCTIONS------//
 		switch msgType {
-
 		case "0":
 			fmt.Println("Received test message")
 			room.BroadcastMessage("0Server received your message!")
 		case "1":
-			err := room.AddClient(senderId, conn)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
+			room.AddClient(senderId, conn)
 			conn.WriteMessage(1, []byte("4&"+room.GetAllIds()))
 			WaitingRoom.BroadcastRoomsUpdate()
 		case "2":
@@ -91,6 +86,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "7":
 			conn.Close()
 			WaitingRoom.RemoveClient(senderId)
+			return
+		case "8":
+			models.AllRooms.ResetServer()
+			WaitingRoom.BroadcastRoomsUpdate()
 		}
 	}
 }
