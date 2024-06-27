@@ -62,7 +62,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		switch msgType {
 
 		case "0":
-			fmt.Println("Received test message")
 			room.BroadcastMessage("0Server received your message!")
 		case "1":
 			err := room.AddClient(senderId, conn)
@@ -75,7 +74,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "2":
 			room.Negotiate(senderId, recepientId, data)
 		case "3":
-			fmt.Println("leaving room", room.Id)
 			room.RemoveClient(senderId)
 			conn.Close()
 			WaitingRoom.BroadcastRoomsUpdate()
@@ -91,6 +89,9 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "7":
 			conn.Close()
 			WaitingRoom.RemoveClient(senderId)
+		case "8":
+			models.AllRooms = make(models.Rooms)
+			WaitingRoom.BroadcastRoomsUpdate()
 		}
 	}
 }
