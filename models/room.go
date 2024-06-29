@@ -34,7 +34,6 @@ func (r *Room) AddClient(id string, conn *websocket.Conn) error {
 }
 
 func (r *Room) RemoveClient(id string) {
-	fmt.Println("removing client...")
 	delete(r.Clients, id)
 	message := "5&" + id + "&&"
 	r.BroadcastMessage(message)

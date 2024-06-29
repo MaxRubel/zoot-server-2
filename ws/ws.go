@@ -70,7 +70,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		case "2":
 			room.Negotiate(senderId, recepientId, data)
 		case "3":
-			fmt.Println("leaving room", room.Id)
 			room.RemoveClient(senderId)
 			conn.Close()
 			WaitingRoom.BroadcastRoomsUpdate()
