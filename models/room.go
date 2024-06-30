@@ -27,18 +27,17 @@ func (r *Room) AddClient(id string, conn *websocket.Conn) error {
 	}
 
 	r.Clients[id] = Client{Ws: conn}
-
-	// fmt.Println("client added to room")
-	// fmt.Println("number of clients in room: ", len(r.Clients))
 	return nil
 }
 
 func (r *Room) RemoveClient(id string) {
+	if r == nil {
+		return
+	}
 	delete(r.Clients, id)
 	message := "5&" + id + "&&"
 	r.BroadcastMessage(message)
 	if len(r.Clients) == 0 {
-		// fmt.Println("room is empty, deleting")
 		r.Delete()
 	}
 }
@@ -67,8 +66,10 @@ func (r *Room) Delete() {
 }
 
 func (r *Room) GetAllIds() string {
+	if r == nil {
+		return ""
+	}
 	var strArr []string
-
 	for key := range r.Clients {
 		strArr = append(strArr, key)
 	}
