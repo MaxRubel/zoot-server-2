@@ -43,6 +43,9 @@ func (r *Room) RemoveClient(id string) {
 }
 
 func (r *Room) BroadcastMessage(msg string) {
+	if r == nil {
+		return
+	}
 	for i := range r.Clients {
 		r.Clients[i].Ws.WriteMessage(1, []byte(msg))
 	}
@@ -50,18 +53,25 @@ func (r *Room) BroadcastMessage(msg string) {
 }
 
 func (r *Room) ClearClientArray() {
+	if r == nil {
+		return
+	}
 	var newMap map[string]Client
 	r.Clients = newMap
-	// fmt.Println("cleared client array", newMap)
 }
 
 func (r *Room) Negotiate(senderId string, receiverId string, data string) {
-	// fmt.Println("negotiating...")
+	if r == nil {
+		return
+	}
 	r.Clients[receiverId].Ws.WriteMessage(1, []byte("3"+"&"+r.Id+"&"+senderId+"&"+receiverId+"&"+data))
 	db.IncrementWsCount()
 }
 
 func (r *Room) Delete() {
+	if r == nil {
+		return
+	}
 	delete(AllRooms, r.Id)
 }
 
@@ -78,7 +88,9 @@ func (r *Room) GetAllIds() string {
 }
 
 func (r *Room) BroadcastRoomsUpdate() {
-	// fmt.Println("updating waiting room")
+	if r == nil {
+		return
+	}
 	msg := AllRoomsJSON()
 	for i := range r.Clients {
 		r.Clients[i].Ws.WriteMessage(1, []byte("7&"+string(msg)))
