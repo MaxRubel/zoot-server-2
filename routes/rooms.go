@@ -23,7 +23,6 @@ func GetAllRooms(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateNewRoom(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("hey hi wow")
 	var newRoom models.Room
 	id := utils.CreateId()
 
