@@ -11,6 +11,7 @@ import (
 )
 
 func GetAllRooms(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("getting all da rooms")
 	roomsJson, err := json.Marshal(models.AllRooms)
 	// fmt.Println("serving number of rooms: ", len(models.AllRooms))
 	if err != nil {
@@ -22,6 +23,7 @@ func GetAllRooms(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateNewRoom(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("hey hi wow")
 	var newRoom models.Room
 	id := utils.CreateId()
 

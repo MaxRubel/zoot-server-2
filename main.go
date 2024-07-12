@@ -5,12 +5,23 @@ import (
 	"net/http"
 
 	"github.com/MaxRubel/zoot-server-2/routes"
+	"github.com/MaxRubel/zoot-server-2/ws"
 	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
-func main() {
+func Router() *mux.Router {
+	r := mux.NewRouter()
 
-	r := routes.Router()
+	r.HandleFunc("/ws", ws.WsHandler)
+	r.HandleFunc("/rooms", routes.GetAllRooms).Methods("GET")
+	r.HandleFunc("/create_room", routes.CreateNewRoom).Methods("POST")
+
+	return r
+}
+
+func main() {
+	r := Router()
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"*"}),
