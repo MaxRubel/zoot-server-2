@@ -15,7 +15,7 @@ func Router() *mux.Router {
 
 	r.HandleFunc("/ws", ws.WsHandler)
 	r.HandleFunc("/rooms", routes.GetAllRooms).Methods("GET")
-	r.HandleFunc("/create_room", routes.CreateNewRoom).Methods("POST")
+	r.HandleFunc("/rooms", routes.CreateNewRoom).Methods("POST")
 
 	return r
 }
@@ -25,7 +25,7 @@ func main() {
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"*"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type"}),
 	)(r)
 
