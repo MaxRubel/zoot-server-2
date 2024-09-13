@@ -5,3 +5,4 @@ dockerfile
 .gitignore
 Deploy_Instructions.md
 deploy.sh
+.env
