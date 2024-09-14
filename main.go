@@ -31,7 +31,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	port := os.Getenv("PORT")
+	listener := os.Getenv("PORT")
 	origin1 := os.Getenv("ORIGIN1")
 	origin2 := os.Getenv("ORIGIN2")
 
@@ -44,7 +44,7 @@ func main() {
 	)(r)
 
 	fmt.Println("Server is running on http://localhost:8080")
-	err = http.ListenAndServe(":"+port, corsHandler)
+	err = http.ListenAndServe(":"+listener, corsHandler)
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 	}
