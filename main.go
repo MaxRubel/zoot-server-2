@@ -31,7 +31,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	listener := os.Getenv("PORT")
+	listener := os.Getenv("LISTENER")
 	origin1 := os.Getenv("ORIGIN1")
 	origin2 := os.Getenv("ORIGIN2")
 
